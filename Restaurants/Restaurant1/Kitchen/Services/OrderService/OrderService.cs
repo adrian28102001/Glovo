@@ -23,7 +23,7 @@ public class OrderService : IOrderService
         _orderRepository = orderRepository;
         _cookService = cookService;
         _foodService = foodService;
-        _normalOrderSemaphore = new Semaphore(2, 2);
+        _normalOrderSemaphore = new Semaphore(1, 1);
         _specialOrderSemaphore = new Semaphore(3, 3);
         _sendOrderSemaphore = new Semaphore(1, 1);
     }
@@ -72,7 +72,6 @@ public class OrderService : IOrderService
             }
             else
             {
-                // ConsoleHelper.Print("There are no orders");
                 await SleepGenerator.Delay(1);
                 await PrepareOrder();
             }

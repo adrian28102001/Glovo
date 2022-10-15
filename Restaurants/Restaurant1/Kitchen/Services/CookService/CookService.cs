@@ -11,14 +11,12 @@ public class CookService : ICookService
     private readonly ICookRepository _cookRepository;
     private readonly IFoodService _foodService;
     private readonly List<Task> _tasks;
-    private readonly Semaphore _semaphore;
 
     public CookService(ICookRepository cookRepository, IFoodService foodService)
     {
         _cookRepository = cookRepository;
         _foodService = foodService;
         _tasks = new List<Task>();
-        _semaphore = new Semaphore(1, 1);
     }
 
     public Task GenerateCooks()
