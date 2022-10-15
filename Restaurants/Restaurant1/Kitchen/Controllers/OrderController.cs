@@ -34,7 +34,7 @@ public class OrderController : Controller
         if (order == null) return;
         try
         {
-            ConsoleHelper.Print($"An order with {order.Id} came in the kitchen", ConsoleColor.DarkYellow);
+            await ConsoleHelper.Print($"An order with {order.Id} came in the kitchen", ConsoleColor.DarkYellow);
             await _orderService.InsertOrder(order);
         }
         catch (Exception e)

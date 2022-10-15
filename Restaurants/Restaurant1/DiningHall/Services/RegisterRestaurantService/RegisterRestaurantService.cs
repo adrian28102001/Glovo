@@ -31,13 +31,13 @@ public class RegisterRestaurantService : IRegisterRestaurantService
 
             if (response.StatusCode == HttpStatusCode.Accepted)
             {
-                ConsoleHelper.Print($"I was registered to Food Ordering Service ");
+                await ConsoleHelper.Print($"I was registered to Food Ordering Service ");
                
             }
         }
         catch (Exception e)
         {
-            ConsoleHelper.Print($"Something went wrong", ConsoleColor.Red);
+            await ConsoleHelper.Print($"Something went wrong", ConsoleColor.Red);
         }
     }
 }

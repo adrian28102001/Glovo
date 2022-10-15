@@ -26,9 +26,9 @@ public class ApiController : ControllerBase
         if (table != null)
         {
             table.TableStatus = TableStatus.IsAvailable;
-            ConsoleHelper.Print($"I received from the kitchen an order with id {order.Id} for table {order.TableId}", ConsoleColor.Cyan);
+            await ConsoleHelper.Print($"I received from the kitchen an order with id {order.Id} for table {order.TableId}", ConsoleColor.Cyan);
             _semaphore.WaitOne();
-            RatingHelper.GetRating(order);
+            await RatingHelper.GetRating(order);
             _semaphore.Release();
         }
     }

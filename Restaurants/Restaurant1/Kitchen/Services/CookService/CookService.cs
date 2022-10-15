@@ -48,37 +48,37 @@ public class CookService : ICookService
 
     public async Task AddFoodToCookerList(Order order, IEnumerable<Food> foodList, Dictionary<int, List<Task>> tasks)
     {
-            var foods = new List<Food>(foodList);
-            foreach (var food in foods.ToList())
+        var foods = new List<Food>(foodList);
+        foreach (var food in foods.ToList())
+        {
+            switch (food.Complexity)
             {
-                switch (food.Complexity)
+                case 3:
                 {
-                    case 3:
-                    {
-                        await PrepareFoodForCooker(order, food, tasks, foods);
-                        break;
-                    }
+                    await PrepareFoodForCooker(order, food, tasks, foods);
+                    break;
+                }
 
-                    case 2:
-                    {
-                        await PrepareFoodForCooker(order, food, tasks, foods);
-                        break;
-                    }
-                    case 1:
-                    {
-                        await PrepareFoodForCooker(order, food, tasks, foods);
-                        break;
-                    }
+                case 2:
+                {
+                    await PrepareFoodForCooker(order, food, tasks, foods);
+                    break;
+                }
+                case 1:
+                {
+                    await PrepareFoodForCooker(order, food, tasks, foods);
+                    break;
                 }
             }
+        }
 
-            if (foods.Any())
-            {
-                await SleepFunctionCall(foods);
-                await AddFoodToCookerList(order, foods, tasks);
-            }
+        if (foods.Any())
+        {
+            await SleepFunctionCall(foods);
+            await AddFoodToCookerList(order, foods, tasks);
+        }
 
-            await Task.WhenAll(tasks[order.Id]);
+        await Task.WhenAll(tasks[order.Id]);
     }
 
     //This cooker is done special for simple orders who can be fast done
@@ -145,17 +145,17 @@ public class CookService : ICookService
         var helperCooker = await _cookRepository.GetCookerByRank(food.Complexity + 1);
         if (helperCooker.CookingList.Count < helperCooker.Proficiency)
         {
-            ConsoleHelper.Print($"A helping {helperCooker.Name} come to help", ConsoleColor.Yellow);
+            await ConsoleHelper.Print($"A helping {helperCooker.Name} come to help", ConsoleColor.Yellow);
             await AdjustCookerCookingList(order, helperCooker, food, foods, tasks);
         }
     }
 
-    private Task AdjustCookerCookingList(Order order, Cook cooker, Food food, ICollection<Food> foods,
+    private async Task AdjustCookerCookingList(Order order, Cook cooker, Food food, ICollection<Food> foods,
         IDictionary<int, List<Task>> tasksDictionary)
     {
         cooker.CookingList.Add(food);
-        ConsoleHelper.Print($"I am {cooker.Name} and I will cook {food.Name}", ConsoleColor.DarkBlue);
-        var task = Task.Run(() => CookFood(order, cooker.Id));
+        await ConsoleHelper.Print($"I am {cooker.Name} and I will cook {food.Name}", ConsoleColor.DarkBlue);
+        var task = Task.Run(() => CookFood(order, cooker, food));
         if (tasksDictionary.ContainsKey(order.Id))
         {
             _tasks.Add(task);
@@ -166,34 +166,26 @@ public class CookService : ICookService
             _tasks.Add(task);
             tasksDictionary.Add(order.Id, _tasks);
         }
-        
+
         foods.Remove(food);
-        return Task.CompletedTask;
     }
 
-    private async Task CookFood(Order order, int cookerId)
+    private async Task CookFood(Order order, Cook cooker, Food food)
     {
-        var cooker = await _cookRepository.GetById(cookerId);
-        while (cooker.CookingList.Any())
+        if (food.CookingApparatus != null)
         {
-            var food = cooker.CookingList.FirstOrDefault();
-            if (food == null) continue;
-            if (food.CookingApparatus != null)
+            if (food.CookingApparatus.IsBusy)
             {
-                if (food.CookingApparatus.IsBusy)
-                {
-                    // ConsoleHelper.Print($"I tried to cook {food.Name} in {food.CookingApparatus.Name} but it's busy");
-                    await SleepGenerator.Delay(1);
-                }
-                else
-                {
-                    await CookFoodInCookingApparatus(food, order, cooker, food.CookingApparatus);
-                }
+                await SleepGenerator.Delay(1);
             }
             else
             {
-                await CookFoodWithoutApparatus(food, order, cooker);
+                await CookFoodInCookingApparatus(food, order, cooker);
             }
+        }
+        else
+        {
+            await CookFoodWithoutApparatus(food, order, cooker);
         }
     }
 
@@ -201,25 +193,20 @@ public class CookService : ICookService
     {
         await SleepGenerator.Delay(food.PreparationTime);
         cooker.CookingList.Remove(food);
-        ConsoleHelper.Print($"I am {cooker.Name} and cooked {food.Name} from order {order.Id}", ConsoleColor.Green);
+        await ConsoleHelper.Print($"I am {cooker.Name} and cooked {food.Name} from order {order.Id}",
+            ConsoleColor.Green);
     }
 
-    private async Task CookFoodInCookingApparatus(Food food, Order order, Cook cooker,
-        CookingApparatus cookingApparatus)
+    private async Task CookFoodInCookingApparatus(Food food, Order order, Cook cooker)
     {
-        cookingApparatus.IsBusy = true;
-        await SleepGenerator.Delay(food.PreparationTime);
-        cookingApparatus.IsBusy = false;
-        cooker.CookingList.Remove(food);
-        ConsoleHelper.Print($"I am {cooker.Name} and cooked {food.Name} from order {order.Id}", ConsoleColor.Green);
+        if (food.CookingApparatus != null)
+        {
+            food.CookingApparatus.IsBusy = true;
+            await SleepGenerator.Delay(food.PreparationTime);
+            food.CookingApparatus.IsBusy = false;
+            cooker.CookingList.Remove(food);
+            await ConsoleHelper.Print($"I am {cooker.Name} and cooked {food.Name} from order {order.Id}",
+                ConsoleColor.Green);
+        }
     }
 }
-
-
-// _orderHistoryService.Insert(new OrderHistory
-// {
-//     Id = IdGenerator.GenerateId(),
-//     CookerId = cookerId,
-//     FoodId = food.Id,
-//     OrderId = order.Id
-// });

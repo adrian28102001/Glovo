@@ -13,6 +13,6 @@ public static class Settings
     public const string FoodOrderingServiceRegisterUrl = "https://localhost:7192/register";
     
     
-    public const string Menu = "U:\\ThirdYear\\PR\\DiningHall\\JSON\\Menu.json";
-    public const string RestaurantData = "U:\\ThirdYear\\PR\\DiningHall\\JSON\\Restaurant.json";
+    public const string Menu = "U:\\ThirdYear\\PR\\LaboratoryNr2\\GlovoSimulator\\Restaurants\\Restaurant1\\DiningHall\\JSON\\Menu.json";
+    public const string RestaurantData = "U:\\ThirdYear\\PR\\LaboratoryNr2\\GlovoSimulator\\Restaurants\\Restaurant1\\DiningHall\\JSON\\Restaurant.json";
 }

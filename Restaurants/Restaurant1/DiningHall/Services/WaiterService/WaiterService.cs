@@ -14,7 +14,7 @@ public class WaiterService : IWaiterService
     private readonly IWaiterRepository _waiterRepository;
     private readonly ITableRepository _tableRepository;
     private readonly IOrderService _orderService;
-    private readonly SemaphoreSlim _semaphore;
+    private readonly Semaphore _semaphore;
 
     public WaiterService(IOrderService orderService, IWaiterRepository waiterRepository,
         ITableRepository tableRepository)
@@ -22,7 +22,7 @@ public class WaiterService : IWaiterService
         _orderService = orderService;
         _waiterRepository = waiterRepository;
         _tableRepository = tableRepository;
-        _semaphore = new SemaphoreSlim(1);
+        _semaphore = new Semaphore(1, 1);
     }
 
     public Task GenerateWaiters()
@@ -47,16 +47,16 @@ public class WaiterService : IWaiterService
 
     public async Task ServeTable()
     {
+        _semaphore.WaitOne();
         var waiter = await GetFreeWaiter();
-        _semaphore.Release();
-
         if (waiter != null)
         {
             var table = await _tableRepository.GetTableByStatus(TableStatus.WaitingForWaiter);
-
+            _semaphore.Release();
             if (table != null)
             {
                 var order = await _orderService.GetOrderByTableId(table.Id);
+
                 if (order != null)
                 {
                     order.WaiterId = waiter.Id;
@@ -65,9 +65,8 @@ public class WaiterService : IWaiterService
                     waiter.IsFree = false;
                     waiter.ActiveOrders.Add(order);
 
-                    ConsoleHelper.Print(
-                        $"I am {waiter.Name} and I drive order {order.Id} in the kitchen from table {table.Id}",
-                        ConsoleColor.Blue);
+                    await ConsoleHelper.Print(
+                        $"I am {waiter.Name} and I drive order {order.Id} in the kitchen from table {table.Id}", ConsoleColor.Blue);
                     await _orderService.SendOrder(order);
 
                     table.TableStatus = TableStatus.WaitingForOrderToBeServed;
@@ -77,16 +76,13 @@ public class WaiterService : IWaiterService
             else
             {
                 var sleepTime = RandomGenerator.NumberGenerator(10);
-                // ConsoleHelper.Print(
-                //     $"There are no tables that need an waiter now, this thread will try again in {sleepTime} seconds",
-                //     ConsoleColor.Red);
                 await SleepGenerator.Delay(sleepTime);
             }
         }
         else
         {
             var sleepTime = RandomGenerator.NumberGenerator(SleepingSetting.NoFreeWaitersMin, SleepingSetting.NoFreeWaitersMax);
-            ConsoleHelper.Print("There are no free waiters now", ConsoleColor.Red);
+            await ConsoleHelper.Print("There are no free waiters now", ConsoleColor.Red);
             await SleepGenerator.Delay(sleepTime);
         }
     }
@@ -94,9 +90,9 @@ public class WaiterService : IWaiterService
     private static async Task SleepWaiter(Waiter waiter)
     {
         var sleepTime = RandomGenerator.NumberGenerator(SleepingSetting.RestWaiterForMin, SleepingSetting.RestWaiterForMax);
-        ConsoleHelper.Print($"I am waiter {waiter.Name}. I will rest for {sleepTime} seconds", ConsoleColor.Yellow);
+        await ConsoleHelper.Print($"I am waiter {waiter.Name}. I will rest for {sleepTime} seconds", ConsoleColor.Yellow);
         await SleepGenerator.Delay(sleepTime);
-        ConsoleHelper.Print($"{waiter.Name} is ready for a new order", ConsoleColor.Green);
+        await ConsoleHelper.Print($"{waiter.Name} is ready for a new order", ConsoleColor.Green);
         waiter.IsFree = true;
     }
 }

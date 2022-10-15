@@ -6,7 +6,7 @@ public static class RatingHelper
 {
     private static readonly List<int> Rating = new();
     
-    public static void GetRating(Order order)
+    public static async Task GetRating(Order order)
     {
         var servedTime = Math.Abs(order.UpdatedOnUtc.Subtract(order.CreatedOnUtc).TotalSeconds);
 
@@ -30,8 +30,8 @@ public static class RatingHelper
         {
             Rating.Add(1);
         }
-        ConsoleHelper.Print($"Order with Id: {order.Id} was expected in {order.MaxWait} but come in {servedTime}");
-        ConsoleHelper.Print($"Rating for {Rating.Count} is : {Rating.Sum() / Rating.Count}", ConsoleColor.Magenta);
+        await ConsoleHelper.Print($"Order with Id: {order.Id} was expected in {order.MaxWait} but come in {servedTime}");
+        await ConsoleHelper.Print($"Rating for {Rating.Count} is : {Rating.Sum() / Rating.Count}", ConsoleColor.Magenta);
     }
     
 }

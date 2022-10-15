@@ -32,7 +32,7 @@ public class Kitchen : IKitchen
         };
 
         await Task.WhenAll(taskList);
-        ConsoleHelper.Print("Everything is ready", ConsoleColor.Green);
+        await ConsoleHelper.Print("Everything is ready", ConsoleColor.Green);
     }
 
     public async Task MaintainKitchen()

@@ -49,8 +49,8 @@ public class OrderService : IOrderService
             _orderRepository.InsertOrder(order);
             var sleepingTime = RandomGenerator.NumberGenerator(SleepingSetting.GenerateOrderOnceInMin,
                 SleepingSetting.GenerateOrderOnceInMax);
-            ConsoleHelper.Print($"A order with id {order.Id} was generated," +
-                                $"the next order in: {sleepingTime} seconds", ConsoleColor.Yellow);
+            await ConsoleHelper.Print($"A order with id {order.Id} was generated," +
+                                      $"the next order in: {sleepingTime} seconds", ConsoleColor.Yellow);
             await SleepGenerator.Delay(sleepingTime);
         }
         else
@@ -69,29 +69,26 @@ public class OrderService : IOrderService
 
     public async Task SendOrder(Order order)
     {
-        await Task.Run(async () =>
+        try
         {
-            try
+            var serializeObject = JsonConvert.SerializeObject(order);
+            var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+
+            const string url = Settings.KitchenUrl;
+            using var client = new HttpClient();
+
+            var response = await client.PostAsync(url, data);
+
+            if (response.StatusCode == HttpStatusCode.Accepted)
             {
-                var serializeObject = JsonConvert.SerializeObject(order);
-                var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
-
-                const string url = Settings.KitchenUrl;
-                using var client = new HttpClient();
-
-                var response = await client.PostAsync(url, data);
-
-                if (response.StatusCode == HttpStatusCode.Accepted)
-                {
-                    ConsoleHelper.Print($"The order with id {order.Id} was driven in the kitchen");
-                    order.OrderStatus = OrderStatus.OrderInTheKitchen;
-                }
+                await ConsoleHelper.Print($"The order with id {order.Id} was driven in the kitchen");
+                order.OrderStatus = OrderStatus.OrderInTheKitchen;
             }
-            catch (Exception e)
-            {
-                ConsoleHelper.Print($"Failed to send order {order.Id}", ConsoleColor.Red);
-            }
-        });
+        }
+        catch (Exception e)
+        {
+            await ConsoleHelper.Print($"Failed to send order {order.Id}", ConsoleColor.Red);
+        }
     }
 
     public Task<ConcurrentBag<Order>> GetAll()

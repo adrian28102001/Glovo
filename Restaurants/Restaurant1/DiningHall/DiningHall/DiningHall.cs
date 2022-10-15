@@ -28,7 +28,7 @@ public class DiningHall : IDiningHall
     {
         var taskList = new List<Task>
         {
-            Task.Run(() => _registerRestaurantService.RegisterRestaurant()),
+            // Task.Run(() => _registerRestaurantService.RegisterRestaurant()),
             Task.Run(() => _foodService.GenerateMenu()),
             Task.Run(() => _waiterService.GenerateWaiters()),
             Task.Run(() => _tableService.GenerateTables())

@@ -30,7 +30,6 @@ public class OrderService : IOrderService
 
     public async Task InsertOrder(Order order)
     {
-        // _orderRepository.Orders.CollectionChanged += PrepareOrder;
         await _orderRepository.InsertOrder(order);
     }
 
@@ -89,7 +88,7 @@ public class OrderService : IOrderService
             if (isSimpleOrder)
             {
                 _specialOrderSemaphore.WaitOne();
-                ConsoleHelper.Print($"I started special order with id {order.Id}, food list size: {foodListSize}");
+                await ConsoleHelper.Print($"I started special order with id {order.Id}, food list size: {foodListSize}");
                 await _cookService.CallSpecialCooker(order, foods, new Dictionary<int, List<Task>>());
                 order.UpdatedOnUtc = DateTime.Now;
                 Console.WriteLine("I am released");
@@ -99,7 +98,7 @@ public class OrderService : IOrderService
             else
             {
                 _normalOrderSemaphore.WaitOne();
-                ConsoleHelper.Print($"I started normal order with id {order.Id}, food list size: {foodListSize}");
+                await ConsoleHelper.Print($"I started normal order with id {order.Id}, food list size: {foodListSize}");
                 await _cookService.AddFoodToCookerList(order, foods, new Dictionary<int, List<Task>>());
                 order.UpdatedOnUtc = DateTime.Now;
                 Console.WriteLine("I am released");
@@ -109,7 +108,7 @@ public class OrderService : IOrderService
             _sendOrderSemaphore.WaitOne();
             await SendOrder(order);
             _sendOrderSemaphore.Release();
-            ConsoleHelper.Print($"Order with id {order.Id} was packed and sent in the kitchen",
+            await ConsoleHelper.Print($"Order with id {order.Id} was packed and sent in the kitchen",
                 ConsoleColor.Magenta);
         });
     }
