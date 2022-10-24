@@ -1,7 +1,8 @@
 ﻿using System.Collections.Concurrent;
-using FoodOrderingServices.Repositories.RestaurantDataRepository;
+using FoodOrderingService.Models;
+using FoodOrderingService.Repositories.RestaurantDataRepository;
 
-namespace FoodOrderingServices.Services.RestaurantDataService;
+namespace FoodOrderingService.Services.RestaurantDataService;
 
 public class RestaurantDataService : IRestaurantDataService
 {
@@ -11,13 +12,18 @@ public class RestaurantDataService : IRestaurantDataService
     {
         _restaurantDataRepository = restaurantDataRepository;
     }
-    public Task<ConcurrentBag<RestaurantData>> GetRestaurantData()
+    public Task<ConcurrentBag<Restaurant>> GetRestaurantData()
     {
         return _restaurantDataRepository.GetRestaurantData();
     }
 
-    public Task Insert(RestaurantData restaurantData)
+    public Task Insert(Restaurant restaurantData)
     {
         return _restaurantDataRepository.Insert(restaurantData);
+    }
+
+    public string GetRestaurantAddressById(int id)
+    {
+        return _restaurantDataRepository.GetRestaurantAddressById(id);
     }
 }

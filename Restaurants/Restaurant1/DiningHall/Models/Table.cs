@@ -1,4 +1,5 @@
-﻿using DiningHall.Models.Status;
+﻿using DiningHall.Models.Base;
+using DiningHall.Models.Status;
 
 namespace DiningHall.Models;
 

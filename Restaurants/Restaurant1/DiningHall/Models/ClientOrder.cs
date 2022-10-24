@@ -1,6 +1,6 @@
-namespace FoodOrderingService.Models;
+﻿namespace DiningHall.Models;
 
-public class Order
+public class ClientOrder
 {
     public int RestaurantId { get; set; }
     public IEnumerable<int> Foods { get; set; }

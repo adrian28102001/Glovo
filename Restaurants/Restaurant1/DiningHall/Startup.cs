@@ -9,7 +9,6 @@ using DiningHall.Services.OrderService;
 using DiningHall.Services.RegisterRestaurantService;
 using DiningHall.Services.TableRepository;
 using DiningHall.Services.WaiterService;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace DiningHall;
 

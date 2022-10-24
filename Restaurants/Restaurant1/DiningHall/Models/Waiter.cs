@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using DiningHall.Models.Base;
 
 namespace DiningHall.Models;
 

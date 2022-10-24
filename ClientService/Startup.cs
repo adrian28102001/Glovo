@@ -1,8 +1,9 @@
-﻿using FoodOrderingService.Repositories.RestaurantDataRepository;
-using FoodOrderingService.Services.OrderService;
-using FoodOrderingService.Services.RestaurantDataService;
+﻿using Client.ClientService;
+using Client.Repositories.RestaurantDataRepository;
+using Client.Service.OrderService;
+using Client.Service.RestaurantDataService;
 
-namespace FoodOrderingService;
+namespace Client;
 
 public class Startup
 {
@@ -22,9 +23,13 @@ public class Startup
         services.AddLogging(config => config.ClearProviders());
         
         services.AddSingleton<IRestaurantDataRepository, RestaurantDataRepository>();
-        services.AddSingleton<IRestaurantDataRepository, RestaurantDataRepository>();
         services.AddSingleton<IRestaurantDataService, RestaurantDataService>();
+        
         services.AddSingleton<IOrderService, OrderService>();
+        services.AddSingleton<IClientService, ClientService.ClientService>();
+        
+        services.AddHostedService<BackgroundTask.BackgroundTask>();
+
     }
 
     public static void Configure(WebApplication app, IWebHostEnvironment env)

@@ -1,4 +1,4 @@
-﻿namespace DiningHall.Helpers;
+﻿namespace Client.Helpers;
 
 public static class IdGenerator
 {

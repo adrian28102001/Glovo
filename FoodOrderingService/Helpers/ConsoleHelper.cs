@@ -1,4 +1,4 @@
-﻿namespace DiningHall.Helpers;
+﻿namespace FoodOrderingService.Helpers;
 
 public static class ConsoleHelper
 {

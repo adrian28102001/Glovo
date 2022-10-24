@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using DiningHall.Models;
-using DiningHall.Models.SettingsFolder;
 using DiningHall.Models.Status;
 using DiningHall.Repositories.GenericRepository;
+using DiningHall.SettingsFolder;
 
 namespace DiningHall.Repositories.TableRepository;
 

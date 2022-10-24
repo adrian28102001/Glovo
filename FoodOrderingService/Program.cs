@@ -1,4 +1,4 @@
-using FoodOrderingServices;
+using FoodOrderingService;
 
 var builder = WebApplication.CreateBuilder(args);
 

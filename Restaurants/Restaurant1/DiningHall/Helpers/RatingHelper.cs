@@ -31,7 +31,7 @@ public static class RatingHelper
             Rating.Add(1);
         }
         await ConsoleHelper.Print($"Order with Id: {order.Id} was expected in {order.MaxWait} but come in {servedTime}");
-        await ConsoleHelper.Print($"Rating for {Rating.Count} is : {Rating.Sum() / Rating.Count}", ConsoleColor.Magenta);
+        await ConsoleHelper.Print($"Rating for {Rating.Count} is : {Rating.Average()}", ConsoleColor.Magenta);
     }
     
 }

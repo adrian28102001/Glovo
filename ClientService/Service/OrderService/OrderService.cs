@@ -1,9 +1,11 @@
 ﻿using System.Net;
 using System.Text;
+using Client.Helpers;
 using Client.Models;
 using Client.Service.RestaurantDataService;
-using DiningHall.Helpers;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using RestSharp;
 
 namespace Client.Service.OrderService;
 
@@ -16,35 +18,41 @@ public class OrderService : IOrderService
         _restaurantDataService = restaurantDataService;
     }
 
-    public async Task<Order> CreateOrder()
+    public async Task<ClientOrder> CreateOrder()
     {
-        var foodIds = new List<int>();
-        var restaurantData = await _restaurantDataService.GetRestaurantData();
-        foreach (var data in restaurantData)
-        {
-            ConsoleHelper.Print(
-                $"We have restaurant with name: {data.RestaurantName} which has a menu of size {data.FoodList.Count}",
-                ConsoleColor.Blue);
-            
-            foodIds.Add(data.FoodList[0].Id);
-            foodIds.Add(data.FoodList[1].Id);
-            foodIds.Add(data.FoodList[2].Id);
-            foodIds.Add(data.FoodList[3].Id);
-        }
+        var order = new List<Order>();
+        var restaurantDataList = await _restaurantDataService.GetRestaurantData();
 
-        return new Order
+        var chooseFoodFromNRestaurants =
+            RandomGenerator.ListNumberGenerator(restaurantDataList.Count); //order for max 3 restaurants at a time
+        foreach (var restaurantId in chooseFoodFromNRestaurants)
         {
-            Id = await IdGenerator.GenerateId(),
-            FoodList = foodIds,
-            OrderStatus = OrderStatus.OrderSent
+            var restaurant = await _restaurantDataService.GetRestaurantDataById(restaurantId);
+            var menu = restaurant.Menu;
+            var randomFoodList = RandomGenerator.ListNumberGenerator(menu.Count());
+            order.Add(new Order
+            {
+                RestaurantId = restaurant.RestaurantId,
+                Foods = randomFoodList,
+                Priority = RandomGenerator.NumberGenerator(3),
+                MaxWait = 0,
+                CreateOnTime = DateTime.Now
+            });
+        }
+        
+        return new ClientOrder
+        {
+            ClientId = await IdGenerator.GenerateId(),
+            OrderId = await IdGenerator.GenerateId(),
+            Orders = order
         };
     }
 
-    public async Task SendOrder(Order order)
+    public async Task SendOrder(ClientOrder clientOrder)
     {
         try
         {
-            var serializeObject = JsonConvert.SerializeObject(order);
+            var serializeObject = JsonConvert.SerializeObject(clientOrder);
             var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
 
             const string url = Settings.FoodOrderingServiceUrl;
@@ -54,12 +62,12 @@ public class OrderService : IOrderService
 
             if (response.StatusCode == HttpStatusCode.Accepted)
             {
-                ConsoleHelper.Print($"The order with id {order.Id} was sent to food ordering service");
+                ConsoleHelper.Print($"The order from client: {clientOrder.ClientId} was sent to food ordering service");
             }
         }
         catch (Exception e)
         {
-            ConsoleHelper.Print($"Failed to send order {order.Id}", ConsoleColor.Red);
+            ConsoleHelper.Print($"Failed to send order {clientOrder.ClientId}", ConsoleColor.Red);
         }
     }
 }

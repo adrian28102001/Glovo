@@ -1,12 +1,12 @@
-﻿using Client.Service.OrderService;
-using DiningHall.Helpers;
+﻿using Client.Helpers;
+using Client.Service.OrderService;
 
 namespace Client.ClientService;
 
 public class ClientService : IClientService
 {
     private readonly IOrderService _orderService;
-
+    
     public ClientService(IOrderService orderService)
     {
         _orderService = orderService;
@@ -17,10 +17,9 @@ public class ClientService : IClientService
         while (!cancellationToken.IsCancellationRequested)
         {
             ConsoleHelper.Print("I will think about getting...");
-            await SleepGenerator.Delay(10);
-            var order = await _orderService.CreateOrder();
-            await _orderService.SendOrder(order);
-            ConsoleHelper.Print($"I just have sent order with id {order.Id}...");
+            var clientOrder = await _orderService.CreateOrder();
+            await _orderService.SendOrder(clientOrder);
+            ConsoleHelper.Print($"I just have sent order from client {clientOrder.ClientId}...");
         }
     }
 }

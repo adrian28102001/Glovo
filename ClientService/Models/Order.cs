@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Text.Json.Serialization;
-
 namespace Client.Models;
 
-public class Order : BaseEntity
+public class Order
 {
-    public IEnumerable FoodList { get; set; }
-    [JsonIgnore] public OrderStatus OrderStatus { get; set; }
+    public int RestaurantId { get; set; }
+    public IEnumerable<int> Foods { get; set; }
+    public int Priority { get; set; }
+    public int MaxWait { get; set; }
+    public DateTime CreateOnTime { get; set; }
 }

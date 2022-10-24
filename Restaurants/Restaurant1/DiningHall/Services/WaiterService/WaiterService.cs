@@ -1,11 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using DiningHall.Helpers;
 using DiningHall.Models;
-using DiningHall.Models.SettingsFolder;
 using DiningHall.Models.Status;
 using DiningHall.Repositories.TableRepository;
 using DiningHall.Repositories.WaiterRepository;
 using DiningHall.Services.OrderService;
+using DiningHall.SettingsFolder;
 
 namespace DiningHall.Services.WaiterService;
 

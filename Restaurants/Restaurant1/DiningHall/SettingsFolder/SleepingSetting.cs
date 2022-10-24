@@ -1,4 +1,4 @@
-﻿namespace DiningHall.Models.SettingsFolder;
+﻿namespace DiningHall.SettingsFolder;
 
 public static class SleepingSetting
 {

@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using FoodOrderingService.Models;
 
-namespace FoodOrderingServices.Services.RestaurantDataService;
+namespace FoodOrderingService.Services.RestaurantDataService;
 
 public interface IRestaurantDataService
 {
-    Task<ConcurrentBag<RestaurantData>> GetRestaurantData();
-    Task Insert(RestaurantData restaurantData);
+    Task<ConcurrentBag<Restaurant>> GetRestaurantData();
+    Task Insert(Restaurant restaurantData);
+    string GetRestaurantAddressById(int id);
 }

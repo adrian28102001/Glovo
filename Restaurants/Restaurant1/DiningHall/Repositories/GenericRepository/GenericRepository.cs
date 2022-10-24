@@ -1,5 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using DiningHall.Models;
+using DiningHall.Models.Base;
 
 namespace DiningHall.Repositories.GenericRepository;
 

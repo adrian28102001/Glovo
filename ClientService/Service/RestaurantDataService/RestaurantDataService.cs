@@ -1,5 +1,5 @@
 ﻿using Client.Models;
-using Client.RestaurantDataRepository;
+using Client.Repositories.RestaurantDataRepository;
 
 namespace Client.Service.RestaurantDataService;
 
@@ -14,11 +14,16 @@ public class RestaurantDataService  : IRestaurantDataService
 
     public Task<IList<RestaurantData>> GetRestaurantData()
     {
-        return _restaurantDataRepository.GetRestaurantData();
+        return _restaurantDataRepository.GetRestaurantData()!;
     }
 
     public Task Insert(RestaurantData restaurantData)
     {
         return _restaurantDataRepository.Insert(restaurantData);
+    }
+
+    public Task<RestaurantData> GetRestaurantDataById(int randomRestaurant)
+    {
+        return _restaurantDataRepository.GetRestaurantDataById(randomRestaurant);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using DiningHall.Helpers;
 using DiningHall.Models;
-using DiningHall.Models.SettingsFolder;
 using DiningHall.Repositories.FoodRepository;
+using DiningHall.SettingsFolder;
 
 namespace DiningHall.Services.FoodService;
 

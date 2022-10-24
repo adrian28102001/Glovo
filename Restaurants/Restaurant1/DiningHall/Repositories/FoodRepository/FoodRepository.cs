@@ -1,5 +1,5 @@
 ﻿using DiningHall.Models;
-using DiningHall.Models.SettingsFolder;
+using DiningHall.SettingsFolder;
 using Newtonsoft.Json;
 
 namespace DiningHall.Repositories.FoodRepository;

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using DiningHall.Models.Base;
 using DiningHall.Models.Status;
 using Newtonsoft.Json;
 
