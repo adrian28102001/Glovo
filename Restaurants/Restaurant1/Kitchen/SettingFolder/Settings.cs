@@ -1,4 +1,4 @@
-﻿namespace Kitchen.Models;
+﻿namespace Kitchen.SettingFolder;
 
 public static class Settings
 {
