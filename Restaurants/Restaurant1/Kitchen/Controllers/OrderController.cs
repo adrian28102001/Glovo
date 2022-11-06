@@ -29,13 +29,29 @@ public class OrderController : Controller
     }
 
     [HttpPost]
-    public async Task GetOrderFromKitchen([FromBody] Order? order)
+    public async Task GetOrderFromRestaurant([FromBody] Order? order)
     {
         if (order == null) return;
         try
         {
             await ConsoleHelper.Print($"An order with {order.Id} came in the kitchen", ConsoleColor.DarkYellow);
             await _orderService.InsertOrder(order);
+        }
+        catch (Exception e)
+        {
+            //ignore
+        }
+    }
+
+    [HttpPost("/response")]
+    public async Task GetResponseFromKitchen([FromBody] ClientOrder? order)
+    {
+        if (order == null) return;
+        try
+        {
+            await ConsoleHelper.Print($"Preparing waiting time for order {order.OrderId} from client {order.ClientId}",
+                ConsoleColor.DarkYellow);
+            await _orderService.PrepareOrderResponse(order);
         }
         catch (Exception e)
         {

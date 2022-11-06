@@ -22,7 +22,7 @@ public class TableService : ITableService
         return _tableRepository.GetAll();
     }
     
-    public Task<Table?> GetById(int id)
+    public Task<Table?> GetById(int? id)
     {
         return _tableRepository.GetById(id);
     }
@@ -36,7 +36,7 @@ public class TableService : ITableService
     {
         var orders = await _orderRepository.GetAll();
         var orderWithMinWaitingTime = orders.MinBy(order => order.MaxWait);
-        return await GetById(orderWithMinWaitingTime!.TableId);
+        return await GetById(orderWithMinWaitingTime?.TableId);
     }
 
     public Task GenerateTables()

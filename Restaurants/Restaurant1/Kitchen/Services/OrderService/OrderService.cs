@@ -3,6 +3,7 @@ using System.Text;
 using Kitchen.Helpers;
 using Kitchen.Models;
 using Kitchen.Repositories.OrderRepository;
+using Kitchen.Services.CookingApparatusServices;
 using Kitchen.Services.CookService;
 using Kitchen.Services.FoodService;
 using Kitchen.SettingFolder;
@@ -15,15 +16,17 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly ICookService _cookService;
     private readonly IFoodService _foodService;
+    private readonly ICookingApparatusServices _cookingApparatusServices;
     private readonly Semaphore _normalOrderSemaphore;
     private readonly Semaphore _specialOrderSemaphore;
     private readonly Semaphore _sendOrderSemaphore;
 
-    public OrderService(IOrderRepository orderRepository, ICookService cookService, IFoodService foodService)
+    public OrderService(IOrderRepository orderRepository, ICookService cookService, IFoodService foodService, ICookingApparatusServices cookingApparatusServices)
     {
         _orderRepository = orderRepository;
         _cookService = cookService;
         _foodService = foodService;
+        _cookingApparatusServices = cookingApparatusServices;
         _normalOrderSemaphore = new Semaphore(1, 1);
         _specialOrderSemaphore = new Semaphore(3, 3);
         _sendOrderSemaphore = new Semaphore(1, 1);
@@ -79,6 +82,41 @@ public class OrderService : IOrderService
         }
     }
 
+    public async Task PrepareOrderResponse(ClientOrder clientOrder)
+    {
+        var menu = await _foodService.GetFoodFromOrder(clientOrder.Foods);
+        var cooks = await _cookService.GetAll();
+        var cookingApparatus = await _cookingApparatusServices.GetAll();
+        var orders = await _orderRepository.GetOrdersToPrepare();
+        var waitingTime =  EstimationTime.ComputeEstimationTime(clientOrder, menu, cooks, cookingApparatus.Count, orders);
+
+        var response = new Response
+        {
+            OrderId = clientOrder.OrderId,
+            WaitingTime = waitingTime
+        };
+        await SendOrderResponse(response);
+    }
+
+    private static async Task SendOrderResponse(Response sendingResponse)
+    {
+        try
+        {
+            var json = JsonConvert.SerializeObject(sendingResponse);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            const string url = Settings.DiningHallResponseUrl;
+            using var client = new HttpClient();
+
+            var response = await client.PostAsync(url, data);
+            var result = await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception e)
+        {
+            //ignore
+        }
+    }
+    
     private async Task CallWaiters(Order order, IEnumerable<Food> foods, int foodListSize)
     {
         await Task.Run(async () =>

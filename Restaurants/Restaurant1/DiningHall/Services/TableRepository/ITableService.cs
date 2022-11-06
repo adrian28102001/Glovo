@@ -7,7 +7,7 @@ namespace DiningHall.Services.TableRepository;
 public interface ITableService
 {
     Task<ConcurrentBag<Table>> GetAll();
-    Task<Table?> GetById(int id);
+    Task<Table?> GetById(int? id);
     Task<Table?> GetTableByStatus(TableStatus status);
     Task<Table?> GetTableWithSmallestWaitingTime();
     Task GenerateTables();

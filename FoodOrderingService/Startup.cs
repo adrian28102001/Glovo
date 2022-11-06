@@ -1,4 +1,5 @@
 ﻿using FoodOrderingService.Repositories.RestaurantDataRepository;
+using FoodOrderingService.Services.ClientOrderService;
 using FoodOrderingService.Services.OrderService;
 using FoodOrderingService.Services.RestaurantDataService;
 
@@ -25,6 +26,7 @@ public class Startup
         services.AddSingleton<IRestaurantDataRepository, RestaurantDataRepository>();
         services.AddSingleton<IRestaurantDataService, RestaurantDataService>();
         services.AddSingleton<IOrderService, OrderService>();
+        services.AddSingleton<IClientOrderService, ClientOrderService>();
     }
 
     public static void Configure(WebApplication app, IWebHostEnvironment env)

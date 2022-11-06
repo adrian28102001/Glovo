@@ -2,5 +2,5 @@
 
 public interface IClientService
 {
-    Task GenerateOrder(CancellationToken cancellationToken);
+    Task ExecuteCode(CancellationToken cancellationToken);
 }

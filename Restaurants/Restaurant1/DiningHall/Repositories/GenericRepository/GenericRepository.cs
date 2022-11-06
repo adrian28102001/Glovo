@@ -17,7 +17,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         return Task.FromResult(_repository);
     }
 
-    public Task<T?> GetById(int id)
+    public Task<T?> GetById(int? id)
     {
         return Task.FromResult(_repository.FirstOrDefault(t => t.Id.Equals(id)));
     }

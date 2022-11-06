@@ -43,7 +43,7 @@ public class TableRepository : ITableRepository
         return _repository.GetAll();
     }
 
-    public Task<Table?> GetById(int id)
+    public Task<Table?> GetById(int? id)
     {
         return _repository.GetById(id);
     }

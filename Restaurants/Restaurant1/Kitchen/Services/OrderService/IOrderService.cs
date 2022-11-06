@@ -8,4 +8,5 @@ public interface IOrderService
     Task InsertOrder(Order order);
     Task<ObservableCollection<Order>> GetAll();
     Task PrepareOrder();
+    Task PrepareOrderResponse(ClientOrder order);
 }

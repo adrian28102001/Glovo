@@ -3,9 +3,7 @@ using System.Text;
 using Client.Helpers;
 using Client.Models;
 using Client.Service.RestaurantDataService;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using RestSharp;
 
 namespace Client.Service.OrderService;
 
@@ -18,9 +16,9 @@ public class OrderService : IOrderService
         _restaurantDataService = restaurantDataService;
     }
 
-    public async Task<ClientOrder> CreateOrder()
+    public async Task<ClientOrder> CreateOrder(int clientId)
     {
-        var order = new List<Order>();
+        var orders = new List<Order>();
         var restaurantDataList = await _restaurantDataService.GetRestaurantData();
 
         var chooseFoodFromNRestaurants =
@@ -28,24 +26,31 @@ public class OrderService : IOrderService
         foreach (var restaurantId in chooseFoodFromNRestaurants)
         {
             var restaurant = await _restaurantDataService.GetRestaurantDataById(restaurantId);
-            var menu = restaurant.Menu;
-            var randomFoodList = RandomGenerator.ListNumberGenerator(menu.Count());
-            order.Add(new Order
+            var menu = restaurant.Menu.ToList();
+            var randomIdsFoodList = RandomGenerator.ListNumberGenerator(menu.Count).ToList();
+            var randomFoodList = GetFoodFromRandomIdsList(menu, randomIdsFoodList);
+            orders.Add(new Order
             {
+                OrderId = await IdGenerator.GenerateOrderId(),
                 RestaurantId = restaurant.RestaurantId,
-                Foods = randomFoodList,
+                ClientId = clientId,
+                Foods = randomIdsFoodList,
                 Priority = RandomGenerator.NumberGenerator(3),
-                MaxWait = 0,
+                MaxWait = MaxWaitingTime.CalculateMaxWaitingTine(randomFoodList),
                 CreateOnTime = DateTime.Now
             });
         }
-        
+
         return new ClientOrder
         {
-            ClientId = await IdGenerator.GenerateId(),
-            OrderId = await IdGenerator.GenerateId(),
-            Orders = order
+            ClientId = clientId,
+            Orders = orders,
         };
+    }
+
+    private static List<Food> GetFoodFromRandomIdsList(IReadOnlyList<Food> foods, IEnumerable<int> randomFoodList)
+    {
+        return randomFoodList.Select(id => foods[id]).ToList();
     }
 
     public async Task SendOrder(ClientOrder clientOrder)

@@ -17,6 +17,13 @@ public static class RandomGenerator
     public static IEnumerable<int> ListNumberGenerator(int listSize)
     {
         var listNumberGenerator = new List<int>();
+        if (listSize == 1)
+        {
+            var randomNumber = NumberGenerator(listSize);
+            listNumberGenerator.Add(randomNumber);
+            return listNumberGenerator;
+        }
+
         while (listNumberGenerator.Count != listSize / 2)
         {
             var randomNumber = NumberGenerator(listSize);

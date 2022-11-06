@@ -1,6 +1,6 @@
-namespace Client.Models;
+namespace Kitchen.Models;
 
-public class Order
+public class ClientOrder
 {
     public int OrderId { get; set; }
     public int RestaurantId { get; set; }

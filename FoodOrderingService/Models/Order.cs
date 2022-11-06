@@ -2,6 +2,8 @@ namespace FoodOrderingService.Models;
 
 public class Order
 {
+    public int OrderId{ get; set; }
+    public int ClientId { get; set; }
     public int RestaurantId { get; set; }
     public IEnumerable<int> Foods { get; set; }
     public int Priority { get; set; }

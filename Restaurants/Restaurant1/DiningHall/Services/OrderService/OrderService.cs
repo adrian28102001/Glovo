@@ -67,7 +67,7 @@ public class OrderService : IOrderService
     //     }
     // }
 
-    public async Task SendOrder(Order order)
+    public async Task SendOrderToKitchen(Order order)
     {
         try
         {
@@ -109,5 +109,69 @@ public class OrderService : IOrderService
     public Task<Order?> GetOrderByTableId(int id)
     {
         return _orderRepository.GetOrderByTableId(id);
+    }
+
+    public async Task AskForResponseInKitchen(ClientOrder clientOrder)
+    {
+        try
+        {
+            var serializeObject = JsonConvert.SerializeObject(clientOrder);
+            var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+
+            const string url = Settings.KitchenUrlResponse;
+            using var client = new HttpClient();
+
+            var response = await client.PostAsync(url, data);
+
+            if (response.StatusCode == HttpStatusCode.Accepted)
+            {
+                await ConsoleHelper.Print($"Request sent");
+            }
+        }
+        catch (Exception e)
+        {
+            await ConsoleHelper.Print($"Failed to send request", ConsoleColor.Red);
+        }
+    }
+
+    public Order MapOrders(ClientOrder clientOrder)
+    {
+        return new Order()
+        {
+            ClientId = clientOrder.ClientId,
+            Priority = clientOrder.Priority,
+            FoodList = clientOrder.Foods,
+            MaxWait = clientOrder.MaxWait,
+            CreatedOnUtc = clientOrder.CreateOnTime
+        };
+    }
+
+    public async Task SendOrderToFoodOrderingService(Order order)
+    {
+        var clientOrder = new OrderReady
+        {
+            ClientId = order.ClientId,
+            OrderId = order.Id,
+            Orders = new List<Order>()
+        };
+        try
+        {
+            var serializeObject = JsonConvert.SerializeObject(clientOrder);
+            var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+
+            const string url = Settings.FoodOrderingServiceReceiveOrderUrl;
+            using var client = new HttpClient();
+
+            var response = await client.PostAsync(url, data);
+
+            if (response.StatusCode == HttpStatusCode.Accepted)
+            {
+                await ConsoleHelper.Print($"Request sent");
+            }
+        }
+        catch (Exception e)
+        {
+            await ConsoleHelper.Print($"Failed to send request", ConsoleColor.Red);
+        }
     }
 }

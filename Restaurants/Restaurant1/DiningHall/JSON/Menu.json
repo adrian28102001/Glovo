@@ -3,7 +3,8 @@
     "Id": 1,
     "Name": "Pizza",
     "PreparationTime": 1,
-    "Complexity": 2
+    "Complexity": 2,
+    "CookingApparatus": "oven"
   },
   {
     "Id": 2,
@@ -15,7 +16,8 @@
     "Id": 3,
     "Name": "Zeama",
     "PreparationTime": 7,
-    "Complexity": 1
+    "Complexity": 1,
+    "CookingApparatus": "stove"
   },
   {
     "Id": 4,
@@ -27,31 +29,36 @@
     "Id": 5,
     "Name": "Island Duck with Mulberry Mustard",
     "PreparationTime": 35,
-    "Complexity": 3
+    "Complexity": 3,
+    "CookingApparatus": "oven"
   },
   {
     "Id": 6,
     "Name": "Waffles",
     "PreparationTime": 10,
-    "Complexity": 1
+    "Complexity": 1,
+    "CookingApparatus": "stove"
   },
   {
     "Id": 7,
     "Name": "Aubergine",
     "PreparationTime": 20,
-    "Complexity": 2
+    "Complexity": 2,
+    "CookingApparatus": "oven"
   },
   {
     "Id": 8,
     "Name": "Lasagna",
     "PreparationTime": 30,
-    "Complexity": 2
+    "Complexity": 2,
+    "CookingApparatus": "oven"
   },
   {
     "Id": 9,
     "Name": "Burger",
     "PreparationTime": 15,
-    "Complexity": 1
+    "Complexity": 1,
+    "CookingApparatus": "stove"
   },
   {
     "Id": 10,
@@ -75,6 +82,7 @@
     "Id": 13,
     "Name": "TobaccoChicken",
     "PreparationTime": 30,
-    "Complexity": 2
+    "Complexity": 2,
+    "CookingApparatus": "oven"
   }
 ]

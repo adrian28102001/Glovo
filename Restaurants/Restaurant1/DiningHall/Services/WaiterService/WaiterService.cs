@@ -67,7 +67,7 @@ public class WaiterService : IWaiterService
 
                     await ConsoleHelper.Print(
                         $"I am {waiter.Name} and I drive order {order.Id} in the kitchen from table {table.Id}", ConsoleColor.Blue);
-                    await _orderService.SendOrder(order);
+                    await _orderService.SendOrderToKitchen(order);
 
                     table.TableStatus = TableStatus.WaitingForOrderToBeServed;
                     await SleepWaiter(waiter);

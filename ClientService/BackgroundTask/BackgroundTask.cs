@@ -18,7 +18,7 @@ public class BackgroundTask : BackgroundService
             await Task.Delay(5000, stoppingToken);
             using var scope = _serviceScopeFactory.CreateScope();
             var clientService = scope.ServiceProvider.GetRequiredService<IClientService>();
-            await clientService.GenerateOrder(stoppingToken);
+            await clientService.ExecuteCode(stoppingToken);
         }
         catch (Exception)
         {

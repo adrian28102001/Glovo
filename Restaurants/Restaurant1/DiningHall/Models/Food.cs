@@ -1,5 +1,4 @@
-﻿using DiningHall.Models.Base;
-
+﻿
 namespace DiningHall.Models;
 
 public class Food
@@ -8,4 +7,5 @@ public class Food
     public string Name { get; set; }
     public int PreparationTime { get; set; }
     public int Complexity { get; set; }
+    public string? CookingApparatus { get; set; }
 }
