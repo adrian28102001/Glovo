@@ -14,13 +14,7 @@ public class ClientOrderService : IClientOrderService
     public Task Insert(ClientOrder clientOrder)
     {
         _clientOrders.Add(clientOrder);
-        ConsoleHelper.Print($"I added to the list order with Id: {clientOrder.OrderId} from client {clientOrder.ClientId}", ConsoleColor.Cyan);
-        return Task.CompletedTask;
-    }
-    
-    public Task RemoveOrder(ClientOrder order)
-    {
-        
+        ConsoleHelper.Print($"I added order from client: {clientOrder.ClientId}", ConsoleColor.Cyan);
         return Task.CompletedTask;
     }
 

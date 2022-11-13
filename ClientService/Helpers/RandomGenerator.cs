@@ -2,10 +2,10 @@
 
 public static class RandomGenerator
 {
-    public static int NumberGenerator(int max)
+    public static Task<int> NumberGenerator(int max)
     {
         var random = new Random();
-        return random.Next(1, max);
+        return Task.FromResult(random.Next(1, max));
     }
 
     public static int NumberGenerator(int min, int max)
@@ -14,25 +14,26 @@ public static class RandomGenerator
         return random.Next(min, max);
     }
 
-    public static IEnumerable<int> ListNumberGenerator(int listSize)
+    public static async Task<IList<int>> ListNumberGenerator(int listSize)
     {
         var listNumberGenerator = new List<int>();
         if (listSize == 1)
         {
-            var randomNumber = NumberGenerator(listSize);
+            var randomNumber = await NumberGenerator(listSize);
             listNumberGenerator.Add(randomNumber);
-            return listNumberGenerator;
+            return await Task.FromResult<IList<int>>(listNumberGenerator);
         }
 
-        while (listNumberGenerator.Count != listSize / 2)
+        var numbersToGenerate = Math.Floor((double) (listSize / 3));
+        while (listNumberGenerator.Count != (int) numbersToGenerate)
         {
-            var randomNumber = NumberGenerator(listSize);
+            var randomNumber = await NumberGenerator(listSize);
             if (!listNumberGenerator.Contains(randomNumber))
             {
                 listNumberGenerator.Add(randomNumber);
             }
         }
 
-        return listNumberGenerator;
+        return await Task.FromResult<IList<int>>(listNumberGenerator);
     }
 }

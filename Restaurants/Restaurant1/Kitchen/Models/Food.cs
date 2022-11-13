@@ -1,4 +1,6 @@
-﻿namespace Kitchen.Models;
+﻿using Kitchen.Models.Base;
+
+namespace Kitchen.Models;
 
 public class Food : BaseEntity
 {

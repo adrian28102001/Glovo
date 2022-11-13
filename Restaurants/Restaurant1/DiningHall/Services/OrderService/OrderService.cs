@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using DiningHall.Helpers;
 using DiningHall.Models;
+using DiningHall.Models.OnlineOrders;
 using DiningHall.Models.Status;
 using DiningHall.Repositories.OrderRepository;
 using DiningHall.Services.FoodService;
@@ -25,69 +26,45 @@ public class OrderService : IOrderService
         _tableService = tableService;
     }
 
-    // public async Task GenerateOrder()
-    // {
-    //     var table = await _tableService.GetTableByStatus(TableStatus.IsAvailable);
-    //
-    //     if (table != null)
-    //     {
-    //         var foodList = await _foodService.GenerateOrderFood();
-    //         var order = new Order
-    //         {
-    //             Id = await IdGenerator.GenerateId(),
-    //             TableId = table.Id,
-    //             Priority = RandomGenerator.NumberGenerator(5),
-    //             CreatedOnUtc = DateTime.Now,
-    //             OrderIsComplete = false,
-    //             FoodList = foodList,
-    //             MaxWait = foodList.CalculateMaximWaitingTime(_foodService),
-    //         };
-    //
-    //         table.OrderId = order.Id;
-    //         table.TableStatus = TableStatus.WaitingForWaiter;
-    //
-    //         _orderRepository.InsertOrder(order);
-    //         var sleepingTime = RandomGenerator.NumberGenerator(SleepingSetting.GenerateOrderOnceInMin,
-    //             SleepingSetting.GenerateOrderOnceInMax);
-    //         await ConsoleHelper.Print($"A order with id {order.Id} was generated," +
-    //                                   $"the next order in: {sleepingTime} seconds", ConsoleColor.Yellow);
-    //         await SleepGenerator.Delay(sleepingTime);
-    //     }
-    //     else
-    //     {
-    //         var tableWithSmallestWaitingTime = await _tableService.GetTableWithSmallestWaitingTime();
-    //         if (tableWithSmallestWaitingTime != null)
-    //         {
-    //             var order = await GetById(tableWithSmallestWaitingTime.OrderId);
-    //             if (order != null)
-    //             {
-    //                 await SleepGenerator.Delay(order.MaxWait);
-    //             }
-    //         }
-    //     }
-    // }
-
-    public async Task SendOrderToKitchen(Order order)
+    public async Task GenerateOrder()
     {
-        try
+        var table = await _tableService.GetTableByStatus(TableStatus.IsAvailable);
+    
+        if (table != null)
         {
-            var serializeObject = JsonConvert.SerializeObject(order);
-            var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
-
-            const string url = Settings.KitchenUrl;
-            using var client = new HttpClient();
-
-            var response = await client.PostAsync(url, data);
-
-            if (response.StatusCode == HttpStatusCode.Accepted)
+            var foodList = await _foodService.GenerateOrderFood();
+            var order = new Order
             {
-                await ConsoleHelper.Print($"The order with id {order.Id} was driven in the kitchen");
-                order.OrderStatus = OrderStatus.OrderInTheKitchen;
-            }
+                Id = await IdGenerator.GenerateId(),
+                TableId = table.Id,
+                Priority = RandomGenerator.NumberGenerator(5),
+                CreatedOnUtc = DateTime.Now,
+                OrderIsComplete = false,
+                FoodList = foodList,
+                MaxWait = foodList.CalculateMaximWaitingTime(_foodService),
+            };
+    
+            table.OrderId = order.Id;
+            table.TableStatus = TableStatus.WaitingForWaiter;
+    
+            _orderRepository.InsertOrder(order);
+            var sleepingTime = RandomGenerator.NumberGenerator(SleepingSetting.GenerateOrderOnceInMin,
+                SleepingSetting.GenerateOrderOnceInMax);
+            await ConsoleHelper.Print($"A order with id {order.Id} was generated," +
+                                      $"the next order in: {sleepingTime} seconds", ConsoleColor.Yellow);
+            await SleepGenerator.Delay(sleepingTime);
         }
-        catch (Exception e)
+        else
         {
-            await ConsoleHelper.Print($"Failed to send order {order.Id}", ConsoleColor.Red);
+            var tableWithSmallestWaitingTime = await _tableService.GetTableWithSmallestWaitingTime();
+            if (tableWithSmallestWaitingTime != null)
+            {
+                var order = await GetById(tableWithSmallestWaitingTime.OrderId);
+                if (order != null)
+                {
+                    await SleepGenerator.Delay(order.MaxWait);
+                }
+            }
         }
     }
 
@@ -100,78 +77,9 @@ public class OrderService : IOrderService
     {
         return _orderRepository.GetById(id);
     }
-
-    public Task<Order?> GetOrderByStatus(OrderStatus status)
-    {
-        return _orderRepository.GetOrderByStatus(status);
-    }
-
+    
     public Task<Order?> GetOrderByTableId(int id)
     {
         return _orderRepository.GetOrderByTableId(id);
-    }
-
-    public async Task AskForResponseInKitchen(ClientOrder clientOrder)
-    {
-        try
-        {
-            var serializeObject = JsonConvert.SerializeObject(clientOrder);
-            var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
-
-            const string url = Settings.KitchenUrlResponse;
-            using var client = new HttpClient();
-
-            var response = await client.PostAsync(url, data);
-
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                await ConsoleHelper.Print($"Request sent");
-            }
-        }
-        catch (Exception e)
-        {
-            await ConsoleHelper.Print($"Failed to send request", ConsoleColor.Red);
-        }
-    }
-
-    public Order MapOrders(ClientOrder clientOrder)
-    {
-        return new Order()
-        {
-            ClientId = clientOrder.ClientId,
-            Priority = clientOrder.Priority,
-            FoodList = clientOrder.Foods,
-            MaxWait = clientOrder.MaxWait,
-            CreatedOnUtc = clientOrder.CreateOnTime
-        };
-    }
-
-    public async Task SendOrderToFoodOrderingService(Order order)
-    {
-        var clientOrder = new OrderReady
-        {
-            ClientId = order.ClientId,
-            OrderId = order.Id,
-            Orders = new List<Order>()
-        };
-        try
-        {
-            var serializeObject = JsonConvert.SerializeObject(clientOrder);
-            var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
-
-            const string url = Settings.FoodOrderingServiceReceiveOrderUrl;
-            using var client = new HttpClient();
-
-            var response = await client.PostAsync(url, data);
-
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                await ConsoleHelper.Print($"Request sent");
-            }
-        }
-        catch (Exception e)
-        {
-            await ConsoleHelper.Print($"Failed to send request", ConsoleColor.Red);
-        }
     }
 }

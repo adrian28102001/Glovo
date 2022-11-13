@@ -8,7 +8,6 @@ using Kitchen.Repositories.OrderRepository;
 using Kitchen.Services.CookingApparatusServices;
 using Kitchen.Services.CookService;
 using Kitchen.Services.FoodService;
-using Kitchen.Services.OrderHistoryService;
 using Kitchen.Services.OrderService;
 
 namespace Kitchen;
@@ -41,7 +40,6 @@ public class Startup
         services.AddSingleton<ICookService, CookService>();
         services.AddSingleton<IOrderService, OrderService>();
         services.AddSingleton<IFoodService, FoodService>();
-        services.AddSingleton<IOrderHistoryService, OrderHistoryService>();
 
         services.AddSingleton<IKitchen, Kitchen.Kitchen>();
         services.AddHostedService<BackgroundTask.BackgroundTask>();

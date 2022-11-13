@@ -2,22 +2,23 @@
 
 public static class IdGenerator
 {
-    private static readonly Semaphore NormalOrderSemaphore = new(1, 1);
+    private static readonly Semaphore ClientSemaphore = new(1, 1);
+    private static readonly Semaphore OrderSemaphore = new(1, 1);
     private static int ClientId { get; set; }
     private static int OrderId { get; set; }
 
     public static Task<int> GenerateClientId()
     {
-        NormalOrderSemaphore.WaitOne();
+        ClientSemaphore.WaitOne();
         ClientId += 1;
-        NormalOrderSemaphore.Release();
+        ClientSemaphore.Release();
         return Task.FromResult(ClientId);
     }
     public static Task<int> GenerateOrderId()
     {
-        NormalOrderSemaphore.WaitOne();
+        OrderSemaphore.WaitOne();
         OrderId += 1;
-        NormalOrderSemaphore.Release();
+        OrderSemaphore.Release();
         return Task.FromResult(OrderId);
     }
 }

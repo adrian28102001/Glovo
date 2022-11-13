@@ -12,7 +12,7 @@ public class ApiController : Controller
     [HttpGet]
     public Task<IList<RestaurantData>?> GetRestaurantData()
     {
-        var client = new RestClient(Settings.GetMenuUrl);
+        var client = new RestClient(Setting.GetMenuUrl);
         var response = client.Execute<IList<RestaurantData>>(new RestRequest());
         return Task.FromResult(response.Data);
     }
@@ -28,9 +28,9 @@ public class ApiController : Controller
     }
     
     [HttpPost("/receiveorder")]
-    public Task GetOrderFromFoodOrderingService([FromBody] ClientOrder clientOrder)
+    public Task GetOrderFromFoodOrderingService([FromBody] OnlineOrder order)
     {
-        ConsoleHelper.Print($"The order for client: {clientOrder.ClientId} is ready" );
+        ConsoleHelper.Print($"The order for client: {order.ClientId} is ready" );
         return Task.CompletedTask;
     }
 }

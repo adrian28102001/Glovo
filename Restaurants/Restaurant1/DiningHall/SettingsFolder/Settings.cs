@@ -4,6 +4,7 @@ public static class Settings
 {
     public const int NrOfTables = 6;
     public const int NrOfWaiters = 3;
+    public const int RestaurantId = 1;
 
     public const int FoodListSize = 10;
 

@@ -1,17 +1,18 @@
 using System.Collections.Concurrent;
 using Kitchen.Models;
+using Kitchen.Models.OnlineOrders;
 
 namespace Kitchen.Helpers;
 
 public static class EstimationTime
 {
-    public static int ComputeEstimationTime(ClientOrder order, IList<Food> foodList, ConcurrentBag<Cook> cooks,
+    public static int ComputeEstimationTime(OnlineOrder order, IEnumerable<Food> foodList, ConcurrentBag<Cook> cooks,
         int cookingApparatusCount,
-        List<Order> waitingOrders)
+        IEnumerable<Order> waitingOrders)
     {
         var timeForFoodWithoutCookingApparatus = 0;
         var timeForFoodWithCookingApparatus = 0;
-        var totalFoodWaitingCurrentOrder = order.Foods.Count();
+        var totalFoodWaitingCurrentOrder = order.Foods.Count;
         var totalFoodsWaiting = waitingOrders.Sum(order1 => order1.FoodList.Count);
         var totalCooksProficiency = cooks.Sum(cook => cook.Proficiency);
         foreach (var food in foodList)

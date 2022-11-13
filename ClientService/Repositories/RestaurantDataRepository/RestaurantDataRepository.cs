@@ -21,7 +21,7 @@ public class RestaurantDataRepository : IRestaurantDataRepository
     [HttpGet]
     public Task<IList<RestaurantData>?> GetRestaurantData()
     {
-        var client = new RestClient(Settings.GetMenuUrl);
+        var client = new RestClient(Setting.GetMenuUrl);
         var response = client.Execute<IList<RestaurantData>>(new RestRequest());
         if (response.Data != null)
         {

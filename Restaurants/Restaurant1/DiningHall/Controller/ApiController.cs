@@ -1,13 +1,12 @@
-﻿using System.Net;
-using System.Text;
-using DiningHall.Helpers;
+﻿using DiningHall.Helpers;
+using DiningHall.Mapping;
 using DiningHall.Models;
+using DiningHall.Models.OnlineOrders;
 using DiningHall.Models.Status;
 using DiningHall.Repositories.TableRepository;
 using DiningHall.Services.OrderService;
 using DiningHall.SettingsFolder;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace DiningHall.Controller;
 
@@ -26,53 +25,14 @@ public class ApiController : ControllerBase
         _semaphore = new Semaphore(1, 1);
     }
 
-    [HttpPost("/order")]
-    public async Task GetOrderFromFoodOrderingService([FromBody] ClientOrder clientOrder)
-    {
-        var order = _orderService.MapOrders(clientOrder);
-        await ConsoleHelper.Print($"I received from the foodOrderingService an order", ConsoleColor.Cyan);
-        // _orderService.AskForResponseInKitchen(clientOrder);
-        await _orderService.SendOrderToKitchen(order);
-    }
-
-    [HttpPost("/response")]
-    public async Task GetResponseFromOrder([FromBody] Response response)
-    {
-        await ConsoleHelper.Print(
-            $"I received from the kitchen waiting time {response.WaitingTime} for orderWith id {response.OrderId}",
-            ConsoleColor.Cyan);
-        await SendResponseToFoodOrderingService(response);
-    }
-
-    private static async Task SendResponseToFoodOrderingService(Response sendingResponse)
-    {
-        try
-        {
-            var serializeObject = JsonConvert.SerializeObject(sendingResponse);
-            var data = new StringContent(serializeObject, Encoding.UTF8, "application/json");
-
-            const string url = Settings.FoodOrderingServiceResponseUrl;
-            using var client = new HttpClient();
-
-            var response = await client.PostAsync(url, data);
-
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                await ConsoleHelper.Print($"Waiting time was sent to foodOrderingService");
-            }
-        }
-        catch (Exception e)
-        {
-            await ConsoleHelper.Print($"Failed to send order waiting time", ConsoleColor.Red);
-        }
-    }
-
     [HttpPost]
     public async Task GetOrderFromKitchen([FromBody] Order order)
     {
         if (order.TableId == null || order.WaiterId == null)
         {
-            await _orderService.SendOrderToFoodOrderingService(order);
+            var onlineOrder = order.MapOnlineOrder();
+            await ApiHelpers<OnlineOrder>.SendOrder(onlineOrder, Settings.FoodOrderingServiceReceiveOrderUrl);
+
         }
         
         order.OrderStatus = OrderStatus.OrderCooked;
@@ -87,5 +47,23 @@ public class ApiController : ControllerBase
             await RatingHelper.GetRating(order);
             _semaphore.Release();
         }
+    }
+
+    [HttpPost("/order")]
+    public async Task GetOrderFromFoodOrderingService([FromBody] OnlineOrder onlineOrder)
+    {
+        await ConsoleHelper.Print($"I received from the foodOrderingService an order", ConsoleColor.Cyan);
+        var order = onlineOrder.MapOrder();
+        await ApiHelpers<Order>.SendOrder(order, Settings.KitchenUrl);
+        await ApiHelpers<OnlineOrder>.SendOrder(onlineOrder, Settings.KitchenUrlResponse);
+    }
+
+    [HttpPost("/response")]
+    public async Task GetResponseFromKitchen([FromBody] Response response)
+    {
+        await ConsoleHelper.Print(
+            $"I received from the kitchen waiting time {response.WaitingTime} for orderWith id {response.OrderId}",
+            ConsoleColor.Cyan);
+        await ApiHelpers<Response>.SendOrder(response, Settings.FoodOrderingServiceResponseUrl);
     }
 }

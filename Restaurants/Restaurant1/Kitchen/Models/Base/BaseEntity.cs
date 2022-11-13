@@ -1,4 +1,4 @@
-﻿namespace Kitchen.Models;
+﻿namespace Kitchen.Models.Base;
 
 public class BaseEntity
 {

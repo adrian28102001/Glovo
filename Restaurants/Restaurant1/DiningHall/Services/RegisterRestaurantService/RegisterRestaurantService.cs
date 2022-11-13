@@ -43,6 +43,7 @@ public class RegisterRestaurantService : IRegisterRestaurantService
         catch (Exception e)
         {
             await ConsoleHelper.Print($"Something went wrong", ConsoleColor.Red);
+            await RegisterRestaurant();
         }
     }
 }

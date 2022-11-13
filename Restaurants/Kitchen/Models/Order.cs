@@ -9,6 +9,6 @@ public class Order : Entity
     public int Priority { get; set; }
     public int MaxWait { get; set; }
     public bool OrderIsComplete { get; set; }
-    public List<int> FoodList { get; set; }
+    public IList<int> FoodList { get; set; }
     [JsonIgnore] public OrderStatus OrderStatus { get; set; }
 }

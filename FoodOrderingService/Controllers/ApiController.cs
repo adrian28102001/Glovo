@@ -5,6 +5,7 @@ using FoodOrderingService.Models;
 using FoodOrderingService.Services.ClientOrderService;
 using FoodOrderingService.Services.OrderService;
 using FoodOrderingService.Services.RestaurantDataService;
+using FoodOrderingService.Settings;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodOrderingService.Controllers;
@@ -17,14 +18,15 @@ public class ApiController : Controller
     private readonly IOrderService _orderService;
     private readonly IClientOrderService _clientOrderService;
     private static readonly Semaphore Semaphore = new(1, 1);
-    public ApiController(IRestaurantDataService restaurantDataService, IOrderService orderService, IClientOrderService clientOrderService)
+
+    public ApiController(IRestaurantDataService restaurantDataService, IOrderService orderService,
+        IClientOrderService clientOrderService)
     {
         _restaurantDataService = restaurantDataService;
         _orderService = orderService;
         _clientOrderService = clientOrderService;
     }
 
-    //here there is a list will all restaurants, helps to make an order in Client ch
     [HttpGet("/menu")]
     public Task<ConcurrentBag<Restaurant>> GetRestaurants()
     {
@@ -47,26 +49,29 @@ public class ApiController : Controller
     {
         Semaphore.WaitOne();
         _clientOrderService.Insert(order);
-        Semaphore.Release();
         _orderService.SeparateOrders(order);
+        Semaphore.Release();
+
         return Task.CompletedTask;
     }
+
     [HttpPost("/orderready")]
-    public Task GetOrderFromRestaurant([FromBody] ClientOrder order)
+    public async Task GetOrderFromRestaurant([FromBody] OnlineOrder order)
     {
         Semaphore.WaitOne();
-        ConsoleHelper.Print($"I received from the restaurant an order with id {order.OrderId}", ConsoleColor.Cyan);
-        _orderService.CheckIfOrderReady(order);
+        await ConsoleHelper.Print($"I received from the restaurant an order from client {order.ClientId}", ConsoleColor.Cyan);
+        Console.WriteLine($"Rating for restaurant {order.RestaurantId} is: {await Rating.ComputeRating(order)}");
+        await _orderService.CheckIfOrderReady(order);
         Semaphore.Release();
-        return Task.CompletedTask;
     }
+
     [HttpPost("/response")]
-    public Task GetResponseFromRestaurant([FromBody] Response response)
+    public async Task GetResponseFromRestaurant([FromBody] Response response)
     {
-        ConsoleHelper.Print($"I received from the restaurant an order with id {response.OrderId}", ConsoleColor.Cyan);
+        await ConsoleHelper.Print($"I received from the restaurant an order with id {response.OrderId}",
+            ConsoleColor.Cyan);
         Semaphore.WaitOne();
-        _orderService.SendResponseToClient(response);
+        await ApiHelpers<Response>.SendOrder(response, Setting.ClientUrl);
         Semaphore.Release();
-        return Task.CompletedTask;
     }
 }

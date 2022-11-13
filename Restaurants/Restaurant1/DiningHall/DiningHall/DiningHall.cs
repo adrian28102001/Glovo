@@ -29,9 +29,9 @@ public class DiningHall : IDiningHall
         var taskList = new List<Task>
         {
             Task.Run(() => _registerRestaurantService.RegisterRestaurant()),
-            // Task.Run(() => _foodService.GenerateMenu()),
-            // Task.Run(() => _waiterService.GenerateWaiters()),
-            // Task.Run(() => _tableService.GenerateTables())
+            Task.Run(() => _foodService.GenerateMenu()),
+            Task.Run(() => _waiterService.GenerateWaiters()),
+            Task.Run(() => _tableService.GenerateTables())
         };
 
         await Task.WhenAll(taskList);
@@ -40,26 +40,27 @@ public class DiningHall : IDiningHall
 
     public async Task MaintainRestaurant(CancellationToken stoppingToken)
     {
-        var waiter1 = Task.Run(() => ServeTable(stoppingToken), stoppingToken);
-        var waiter2 = Task.Run(() => ServeTable(stoppingToken), stoppingToken);
-        var waiter3 = Task.Run(() => ServeTable(stoppingToken), stoppingToken);
-        var waiter4 = Task.Run(() => ServeTable(stoppingToken), stoppingToken);
-
-        var taskList = new List<Task>
-        {
-            waiter1, waiter2, waiter3, waiter4
-        };
-
-        await Task.WhenAll(taskList);
+        // var generateOrder = Task.Run(() => GenerateOrders(stoppingToken), stoppingToken);
+        // var waiter1 = Task.Run(() => ServeTable(stoppingToken), stoppingToken);
+        // var waiter2 = Task.Run(() => ServeTable(stoppingToken), stoppingToken);
+        // var waiter3 = Task.Run(() => ServeTable(stoppingToken), stoppingToken);
+        // var waiter4 = Task.Run(() => ServeTable(stoppingToken), stoppingToken);
+        //
+        // var taskList = new List<Task>
+        // {
+        //     generateOrder, waiter1, waiter2, waiter3, waiter4
+        // };
+        //
+        // await Task.WhenAll(taskList);
     }
 
-    // private async Task GenerateOrders(CancellationToken stoppingToken)
-    // {
-    //     while (!stoppingToken.IsCancellationRequested)
-    //     {
-    //         await _orderService.GenerateOrder();
-    //     }
-    // }
+    private async Task GenerateOrders(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await _orderService.GenerateOrder();
+        }
+    }
 
     private async Task ServeTable(CancellationToken stoppingToken)
     {

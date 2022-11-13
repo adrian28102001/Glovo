@@ -1,7 +1,6 @@
-﻿using System.Collections.Concurrent;
-using Kitchen.Helpers;
+﻿using Kitchen.Helpers;
 using Kitchen.Models;
-using Kitchen.Services.OrderHistoryService;
+using Kitchen.Models.OnlineOrders;
 using Kitchen.Services.OrderService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,22 +11,13 @@ namespace Kitchen.Controllers;
 public class OrderController : Controller
 {
     private readonly IOrderService _orderService;
-    private readonly IOrderHistoryService _orderHistoryService;
-    private readonly SemaphoreSlim _semaphore;
+    private static readonly Semaphore Semaphore = new(1, 1);
 
-    public OrderController(IOrderService orderService, IOrderHistoryService orderHistoryService)
+    public OrderController(IOrderService orderService)
     {
         _orderService = orderService;
-        _orderHistoryService = orderHistoryService;
-        _semaphore = new SemaphoreSlim(1);
     }
-
-    [HttpGet]
-    public ConcurrentBag<OrderHistory> GetOrderHistory()
-    {
-        return _orderHistoryService.GetAll();
-    }
-
+    
     [HttpPost]
     public async Task GetOrderFromRestaurant([FromBody] Order? order)
     {
@@ -44,14 +34,15 @@ public class OrderController : Controller
     }
 
     [HttpPost("/response")]
-    public async Task GetResponseFromKitchen([FromBody] ClientOrder? order)
+    public async Task GetResponseFromKitchen([FromBody] OnlineOrder order)
     {
-        if (order == null) return;
         try
         {
+            Semaphore.WaitOne();
             await ConsoleHelper.Print($"Preparing waiting time for order {order.OrderId} from client {order.ClientId}",
                 ConsoleColor.DarkYellow);
             await _orderService.PrepareOrderResponse(order);
+            Semaphore.Release();
         }
         catch (Exception e)
         {

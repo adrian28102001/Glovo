@@ -2,6 +2,7 @@
 using System.Text;
 using Kitchen.Helpers;
 using Kitchen.Models;
+using Kitchen.Models.OnlineOrders;
 using Kitchen.Repositories.OrderRepository;
 using Kitchen.Services.CookingApparatusServices;
 using Kitchen.Services.CookService;
@@ -21,7 +22,8 @@ public class OrderService : IOrderService
     private readonly Semaphore _specialOrderSemaphore;
     private readonly Semaphore _sendOrderSemaphore;
 
-    public OrderService(IOrderRepository orderRepository, ICookService cookService, IFoodService foodService, ICookingApparatusServices cookingApparatusServices)
+    public OrderService(IOrderRepository orderRepository, ICookService cookService, IFoodService foodService,
+        ICookingApparatusServices cookingApparatusServices)
     {
         _orderRepository = orderRepository;
         _cookService = cookService;
@@ -82,41 +84,24 @@ public class OrderService : IOrderService
         }
     }
 
-    public async Task PrepareOrderResponse(ClientOrder clientOrder)
+    public async Task PrepareOrderResponse(OnlineOrder clientOrder)
     {
         var menu = await _foodService.GetFoodFromOrder(clientOrder.Foods);
         var cooks = await _cookService.GetAll();
         var cookingApparatus = await _cookingApparatusServices.GetAll();
         var orders = await _orderRepository.GetOrdersToPrepare();
-        var waitingTime =  EstimationTime.ComputeEstimationTime(clientOrder, menu, cooks, cookingApparatus.Count, orders);
+        var waitingTime =
+            EstimationTime.ComputeEstimationTime(clientOrder, menu, cooks, cookingApparatus.Count, orders);
 
         var response = new Response
         {
             OrderId = clientOrder.OrderId,
             WaitingTime = waitingTime
         };
-        await SendOrderResponse(response);
+
+        await ApiHelper<Response>.SendOrder(response, Settings.DiningHallResponseUrl);
     }
 
-    private static async Task SendOrderResponse(Response sendingResponse)
-    {
-        try
-        {
-            var json = JsonConvert.SerializeObject(sendingResponse);
-            var data = new StringContent(json, Encoding.UTF8, "application/json");
-
-            const string url = Settings.DiningHallResponseUrl;
-            using var client = new HttpClient();
-
-            var response = await client.PostAsync(url, data);
-            var result = await response.Content.ReadAsStringAsync();
-        }
-        catch (Exception e)
-        {
-            //ignore
-        }
-    }
-    
     private async Task CallWaiters(Order order, IEnumerable<Food> foods, int foodListSize)
     {
         await Task.Run(async () =>
@@ -126,12 +111,12 @@ public class OrderService : IOrderService
             if (isSimpleOrder)
             {
                 _specialOrderSemaphore.WaitOne();
-                await ConsoleHelper.Print($"I started special order with id {order.Id}, food list size: {foodListSize}");
+                await ConsoleHelper.Print(
+                    $"I started special order with id {order.Id}, food list size: {foodListSize}");
                 await _cookService.CallSpecialCooker(order, foods, new Dictionary<int, List<Task>>());
                 order.UpdatedOnUtc = DateTime.Now;
                 Console.WriteLine("I am released");
                 _specialOrderSemaphore.Release();
-               
             }
             else
             {
@@ -144,7 +129,7 @@ public class OrderService : IOrderService
             }
 
             _sendOrderSemaphore.WaitOne();
-            await SendOrder(order);
+            await ApiHelper<Order>.SendOrder(order, Settings.DiningHallUrl);
             _sendOrderSemaphore.Release();
             await ConsoleHelper.Print($"Order with id {order.Id} was packed and sent in the kitchen",
                 ConsoleColor.Magenta);
@@ -169,28 +154,5 @@ public class OrderService : IOrderService
         }
 
         return result;
-    }
-
-    private static async Task SendOrder(Order order)
-    {
-        await Task.Run(async () =>
-        {
-            try
-            {
-                Console.WriteLine($"I have sent the order with id: {order.Id} to kitchen");
-                var json = JsonConvert.SerializeObject(order);
-                var data = new StringContent(json, Encoding.UTF8, "application/json");
-
-                const string url = Settings.DiningHallUrl;
-                using var client = new HttpClient();
-
-                var response = await client.PostAsync(url, data);
-                var result = await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception e)
-            {
-                //ignore
-            }
-        });
     }
 }

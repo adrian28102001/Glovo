@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Kitchen.Models;
+using Kitchen.Models.Base;
 
 namespace Kitchen.Repositories.GenericRepository;
 

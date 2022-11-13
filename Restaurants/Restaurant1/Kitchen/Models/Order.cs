@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using Kitchen.Models.Base;
+using Newtonsoft.Json;
 
 namespace Kitchen.Models;
 
-public class Order : Entity
+public class Order : Entity, IOrder
 {
     public int? TableId { get; set; }
     public int? WaiterId { get; set; }

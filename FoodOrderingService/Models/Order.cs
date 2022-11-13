@@ -1,6 +1,6 @@
 namespace FoodOrderingService.Models;
 
-public class Order
+public class Order : IOrder
 {
     public int OrderId{ get; set; }
     public int ClientId { get; set; }
